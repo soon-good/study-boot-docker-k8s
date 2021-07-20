@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dockerboot-app-step1
+spec:
+  selector:
+    matchLabels:
+      app: dockerboot-app-step1
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: dockerboot-app-step1
+    spec:
+      containers:
+        - name: dockerboot-app-step1
+          image: dockerboot-step1
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name:  dockerboot-app-step1
+spec:
+  selector:
+    app:  dockerboot-app-step1
+  type:  LoadBalancer
+  ports:
+    - port: 9093
+      targetPort: 8080
