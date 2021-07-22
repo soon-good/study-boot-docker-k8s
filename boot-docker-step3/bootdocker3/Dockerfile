@@ -1,12 +1,13 @@
 FROM openjdk:11.0.8-jdk-slim AS openjdk-image
-RUN apt-get update;
-WORKDIR source
+WORKDIR original
 ARG JAR_FILE=target/bootdocker*.jar
-COPY ${JAR_FILE} application.jar
-RUN jar -xf ./application.jar
+COPY ${JAR_FILE} target.jar
+RUN java -jar -Djarmode=layertools target.jar extract
 
 FROM openjdk:11.0.8-jre-slim
 WORKDIR application
-COPY --from=openjdk-image source/BOOT-INF/lib lib
-COPY --from=openjdk-image source/BOOT-INF/classes app
-ENTRYPOINT ["java","-cp","app:lib/*", "io.study.bootdocker.BootdockerApplication"]
+COPY --from=openjdk-image original/application ./
+COPY --from=openjdk-image original/dependencies ./
+COPY --from=openjdk-image original/snapshot-dependencies ./
+COPY --from=openjdk-image original/spring-boot-loader ./
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
